@@ -84,17 +84,7 @@ public class CurrentTasksFragment extends Fragment {
                 String task = newTaskText.getText().toString();
                 newTaskText.setText("");
                 //TODO введенную задачу записываем в файл
-                try {
-                    BufferedWriter bf = new BufferedWriter(
-                            new OutputStreamWriter(
-                                    getActivity().openFileOutput(FILENAME, Context.MODE_APPEND)));
-                    bf.write(task + "\n");
-                    bf.close();
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+
                 //TODO создаём объекты интерфейса в зависимости от чтения из файла
                 //создать объект интерфейса
                 TextView newTask = new TextView(getContext());
