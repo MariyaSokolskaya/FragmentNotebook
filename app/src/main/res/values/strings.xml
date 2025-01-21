@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">FragmentNotebook</string>
+    <string name="title_text">Ежедневник</string>
+    <string name="cur_task_text">Текущие задачи</string>
+    <string name="fin_task_text">Завершенные задачи</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="entertext">Ввести задачу</string>
+</resources>
