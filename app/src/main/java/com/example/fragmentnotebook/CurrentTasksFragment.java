@@ -12,18 +12,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link CurrentTasksFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CurrentTasksFragment extends Fragment {
+public class CurrentTasksFragment extends Fragment implements View.OnClickListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -63,11 +67,37 @@ public class CurrentTasksFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        //открыть файл для чтения и проверить существование
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    getActivity().openFileInput(FILENAME)));
+            String task = br.readLine();
+            while (task != null){
+                listTasks.add(task);
+                task = br.readLine();
+            }
+            br.close();
+
+        } catch (FileNotFoundException e) {
+            Toast.makeText(getContext(), "Задач пока нет", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        //переносим задачи на интерфейс
+        for (String task: listTasks) {
+            TextView newTask = new TextView(getContext());
+            //настроить объект интерфейса
+            newTask.setText(task);
+            newTask.setOnClickListener(this);
+            listTextView.add(newTask);
+        }
     }
     EditText newTaskText;
     Button newTaskButton;
     LinearLayout tasksLayout;
     public final String FILENAME = "tasks.txt";
+    ArrayList<String> listTasks = new ArrayList<>();//"резиновый" массив
+    ArrayList<TextView> listTextView = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,13 +108,21 @@ public class CurrentTasksFragment extends Fragment {
         tasksLayout = v.findViewById(R.id.currentTasksList);
         newTaskButton = v.findViewById(R.id.enterButton);
 
+        //"проявляем" задачи, записанные ранее
+        LinearLayout.LayoutParams layoutParams = new LinearLayout
+                .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        for (TextView taskView: listTextView) {
+            tasksLayout.addView(taskView, layoutParams);
+        }
+
         newTaskButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String task = newTaskText.getText().toString();
                 newTaskText.setText("");
-                //TODO введенную задачу записываем в файл
-
+                //TODO введенную задачу записываем в список
+                listTasks.add(task);
                 //TODO создаём объекты интерфейса в зависимости от чтения из файла
                 //создать объект интерфейса
                 TextView newTask = new TextView(getContext());
@@ -106,5 +144,58 @@ public class CurrentTasksFragment extends Fragment {
         });
 
         return v;
+    }
+
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        //открыть файл для чтения и проверить существование
+//        try {
+//            BufferedReader br = new BufferedReader(new InputStreamReader(
+//                    getActivity().openFileInput(FILENAME)));
+//            String task = br.readLine();
+//            while (task != null){
+//                listTasks.add(task);
+//                task = br.readLine();
+//            }
+//            br.close();
+//
+//        } catch (FileNotFoundException e) {
+//            Toast.makeText(getContext(), "Задач пока нет", Toast.LENGTH_LONG).show();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        //переносим задачи на интерфейс
+//        for (String task: listTasks) {
+//            TextView newTask = new TextView(getContext());
+//            //настроить объект интерфейса
+//            newTask.setText(task);
+//            newTask.setOnClickListener(this);
+//            listTextView.add(newTask);
+//        }
+//    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        try {
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
+                    getActivity().openFileOutput(FILENAME, Context.MODE_APPEND)));
+            for (String task: listTasks) {
+                bw.write(task + "\n");
+            }
+            bw.close();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        listTasks.clear();
+        Toast.makeText(getContext(), "Запись выполнена", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onClick(View view) {
+
     }
 }
